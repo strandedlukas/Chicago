@@ -1,0 +1,472 @@
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+
+local Window = Library.CreateLib("Chicago Remastered script", "DarkTheme")
+
+local Tab = Window:NewTab("Chicago")
+
+local Section = Tab:NewSection("Autofarm")
+
+Section:NewToggle("Autofarm (bank)", "ToggleInfo", function(state)
+    if state then
+        -- Function to automate bank robbery
+local function autoBankRobbery()
+    -- Get player
+    local player = game.Players.LocalPlayer
+    
+    -- Teleport to the bank
+    player.Character:SetPrimaryPartCFrame(CFrame.new(Vector3.new(100, 10, 50))) -- Adjust the coordinates to match the bank's location
+    
+    -- Wait for the player to teleport
+    wait(2) -- Adjust the wait time if necessary
+    
+    -- Rob the bank (assuming there's a button to trigger the robbery)
+    local bankButton = game.Workspace.Bank.Button -- Adjust this to match the button's name in the game
+    bankButton.ClickDetector:Click()
+    
+    -- Wait for the robbery to complete
+    wait(10) -- Adjust the wait time based on the time it takes to rob the bank
+    
+    -- Teleport back to the sewers
+    player.Character:SetPrimaryPartCFrame(CFrame.new(Vector3.new(0, 10, 0))) -- Adjust the coordinates to match the sewers' location
+end
+
+-- Call the function to automate bank robbery
+autoBankRobbery()
+
+    else
+        print("Toggle Off")
+    end
+end)
+
+local Section = Tab:NewSection("Esp Functions")
+
+Section:NewButton("Esp", "ButtonInfo", function()
+    -- Function to create ESP
+local function createESP()
+    -- Clear existing ESP elements
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BillboardGui") or obj:IsA("Frame") or obj:IsA("BoxHandleAdornment") then
+            obj:Destroy()
+        end
+    end
+
+    -- Get all players in the game
+    local players = game:GetService("Players"):GetPlayers()
+    for _, player in ipairs(players) do
+        if player.Character then
+            local character = player.Character
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            local humanoid = character:WaitForChild("Humanoid")
+
+            -- Create an ESP box (blue)
+            local espBox = Instance.new("BoxHandleAdornment")
+            espBox.Name = "ESPBox"
+            espBox.Adornee = character
+            espBox.Size = character:GetExtentsSize() + Vector3.new(0.2, 0.2, 0.2)
+            espBox.AlwaysOnTop = true
+            espBox.ZIndex = 1
+            espBox.Color3 = Color3.fromRGB(0, 0, 255) -- Blue color for ESP box
+            espBox.Transparency = 0.5
+            espBox.Visible = true
+            espBox.Parent = character
+
+            -- Display health text
+            local healthText = Instance.new("TextLabel")
+            healthText.Text = "Health: " .. tostring(math.floor(humanoid.Health))
+            healthText.Size = UDim2.new(0, 50, 0, 20)
+            healthText.Position = UDim2.new(0, -70, 0, -10)
+            healthText.BackgroundTransparency = 1
+            healthText.TextColor3 = Color3.new(1, 1, 1)
+            healthText.TextStrokeTransparency = 0
+            healthText.Font = Enum.Font.SourceSans
+            healthText.TextSize = 14
+            healthText.TextStrokeColor3 = Color3.new(0, 0, 0)
+            healthText.Parent = espBox
+
+            -- Update health continuously
+            humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+                healthText.Text = "Health: " .. tostring(math.floor(humanoid.Health))
+            end)
+
+            -- Display name label (red)
+            local nameLabel = Instance.new("BillboardGui")
+            nameLabel.Name = "NameLabel"
+            nameLabel.AlwaysOnTop = true
+            nameLabel.Size = UDim2.new(0, 100, 0, 20)
+            nameLabel.StudsOffset = Vector3.new(0, 3, 0)
+            nameLabel.Parent = humanoidRootPart
+
+            local nameLabelText = Instance.new("TextLabel")
+            nameLabelText.Text = player.Name
+            nameLabelText.Size = UDim2.new(1, 0, 1, 0)
+            nameLabelText.BackgroundTransparency = 1
+            nameLabelText.TextColor3 = Color3.new(1, 0, 0) -- Red color for name label
+            nameLabelText.Font = Enum.Font.SourceSans
+            nameLabelText.TextSize = 14
+            nameLabelText.Parent = nameLabel
+
+            -- Display health bar
+            local healthBar = Instance.new("Frame")
+            healthBar.Name = "HealthBar"
+            healthBar.Size = UDim2.new(1, 0, 0, 5)
+            healthBar.Position = UDim2.new(0, 0, 1, 0)
+            healthBar.BackgroundColor3 = Color3.new(0, 1, 0) -- Green color for health bar
+            healthBar.BorderSizePixel = 0
+            healthBar.Parent = nameLabel
+            healthBar.AnchorPoint = Vector2.new(0.5, 0)
+
+            local function updateHealthBar()
+                local maxHealth = humanoid.MaxHealth
+                local currentHealth = humanoid.Health
+                local healthPercentage = currentHealth / maxHealth
+
+                healthBar.Size = UDim2.new(healthPercentage, 0, 0, 5)
+            end
+
+            updateHealthBar()
+
+            humanoid:GetPropertyChangedSignal("Health"):Connect(updateHealthBar)
+            humanoid:GetPropertyChangedSignal("MaxHealth"):Connect(updateHealthBar)
+
+            -- Display health line
+            local healthLine = Instance.new("Frame")
+            healthLine.Name = "HealthLine"
+            healthLine.Size = UDim2.new(0, 5, 1, 0)
+            healthLine.Position = UDim2.new(-1, 0, 0, 0)
+            healthLine.BackgroundColor3 = Color3.new(1, 0, 0) -- Red color for health line
+            healthLine.BorderSizePixel = 0
+            healthLine.Parent = nameLabel
+
+            local function updateHealthLine()
+                local healthRatio = humanoid.Health / humanoid.MaxHealth
+
+                -- Calculate color based on health ratio
+                local color
+                if healthRatio >= 0.5 then
+                    color = Color3.new
+                                       color = Color3.new(1 - 2 * (healthRatio - 0.5), 1, 0)
+                else
+                    color = Color3.new(1, healthRatio * 2, 0)
+                end
+
+                healthLine.BackgroundColor3 = color
+            end
+
+            updateHealthLine()
+
+            humanoid:GetPropertyChangedSignal("Health"):Connect(updateHealthLine)
+            humanoid:GetPropertyChangedSignal("MaxHealth"):Connect(updateHealthLine)
+        end
+    end
+end
+
+-- Call the function to create ESP
+while true do
+    createESP()
+    wait(1) -- Reset every second
+end
+
+end)
+
+local Section = Tab:NewSection("One Tap")
+
+Section:NewButton("Onetap Player", "ButtonInfo", function()
+    -- Function to enable one-tap shooting
+local function enableOneTapShooting()
+    -- Get player
+    local player = game.Players.LocalPlayer
+    
+    -- Check if the player has a shooting tool equipped
+    if player.Character and player.Character:FindFirstChildOfClass("Tool") then
+        local tool = player.Character:FindFirstChildOfClass("Tool")
+        
+        -- Modify the shooting mechanics
+        tool.Equipped:Connect(function()
+            tool.Activated:Connect(function()
+                local target = game.Players:GetPlayers() -- Get all players in the game
+                for i = 1, #target do
+                    local enemy = target[i]
+                    if enemy.Character and enemy.Character:FindFirstChild("Humanoid") then
+                        -- Kill the player with one shot
+                        enemy.Character.Humanoid.Health = 0
+                    end
+                end
+            end)
+        end)
+    end
+end
+
+-- Call the function to enable one-tap shooting
+enableOneTapShooting()
+
+end)
+
+local Section = Tab:NewSection("Locks")
+
+Section:NewToggle("Camera Lock", "ToggleInfo", function(state)
+    if state then
+        -- Function to check if a player is behind a wall
+local function isPlayerBehindWall(player)
+    -- Perform raycasting to detect obstacles between the player and the camera
+    local character = player.Character
+    if character then
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            local camera = game.Workspace.CurrentCamera
+            if camera then
+                local ray = Ray.new(camera.CFrame.Position, (rootPart.Position - camera.CFrame.Position).Unit * 100)
+                local part, position = game.Workspace:FindPartOnRay(ray, player.Character, false, true)
+                if part and part:IsDescendantOf(player.Character) then
+                    return false -- Player is not behind a wall
+                end
+            end
+        end
+    end
+    return true -- Player is behind a wall
+end
+
+-- Function to lock the camera on players
+local function camLock()
+    while true do
+        wait(0.1) -- Adjust the delay between checks if necessary
+        
+        -- Get all players in the game
+        local players = game.Players:GetPlayers()
+        for _, player in ipairs(players) do
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                -- Check if the player is not behind a wall
+                if not isPlayerBehindWall(player) then
+                    -- Lock the camera on the humanoid root part
+                    local rootPart = player.Character.HumanoidRootPart
+                    game.Workspace.CurrentCamera.CFrame = CFrame.new(rootPart.Position)
+                end
+            end
+        end
+    end
+end
+
+-- Call the function to create camera lock
+camLock()
+
+    else
+        print("Toggle Off")
+    end
+end)
+
+Section:NewButton("Camlock (Q Toggle)", "ButtonInfo", function()
+    getgenv().AimPart = "HumanoidRootPart" -- For R15 Games: {UpperTorso, LowerTorso, HumanoidRootPart, Head} | For R6 Games: {Head, Torso, HumanoidRootPart}
+getgenv().AimlockKey = "q"
+getgenv().AimRadius = 30 
+getgenv().ThirdPerson = true 
+getgenv().FirstPerson = true
+getgenv().TeamCheck = false -- Check if Target is on your Team (True means it wont lock onto your teamates, false is vice versa) (Set it to false if there are no teams)
+getgenv().PredictMovement = true -- Predicts if they are moving in fast velocity (like jumping) so the aimbot will go a bit faster to match their speed 
+getgenv().PredictionVelocity = 8.8
+
+local Players, Uis, RService, SGui = game:GetService"Players", game:GetService"UserInputService", game:GetService"RunService", game:GetService"StarterGui";
+local Client, Mouse, Camera, CF, RNew, Vec3, Vec2 = Players.LocalPlayer, Players.LocalPlayer:GetMouse(), workspace.CurrentCamera, CFrame.new, Ray.new, Vector3.new, Vector2.new;
+local Aimlock, MousePressed, CanNotify = true, false, false;
+local AimlockTarget;
+getgenv().CiazwareUniversalAimbotLoaded = true
+
+getgenv().WorldToViewportPoint = function(P)
+    return Camera:WorldToViewportPoint(P)
+end
+
+getgenv().WorldToScreenPoint = function(P)
+    return Camera.WorldToScreenPoint(Camera, P)
+end
+
+getgenv().GetObscuringObjects = function(T)
+    if T and T:FindFirstChild(getgenv().AimPart) and Client and Client.Character:FindFirstChild("Head") then 
+        local RayPos = workspace:FindPartOnRay(RNew(
+            T[getgenv().AimPart].Position, Client.Character.Head.Position)
+        )
+        if RayPos then return RayPos:IsDescendantOf(T) end
+    end
+end
+
+getgenv().GetNearestTarget = function()
+    -- Credits to whoever made this, i didnt make it, and my own mouse2plr function kinda sucks
+    local players = {}
+    local PLAYER_HOLD  = {}
+    local DISTANCES = {}
+    for i, v in pairs(Players:GetPlayers()) do
+        if v ~= Client then
+            table.insert(players, v)
+        end
+    end
+    for i, v in pairs(players) do
+        if v.Character ~= nil then
+            local AIM = v.Character:FindFirstChild("Head")
+            if getgenv().TeamCheck == true and v.Team ~= Client.Team then
+                local DISTANCE = (v.Character:FindFirstChild("Head").Position - game.Workspace.CurrentCamera.CFrame.p).magnitude
+                local RAY = Ray.new(game.Workspace.CurrentCamera.CFrame.p, (Mouse.Hit.p - game.Workspace.CurrentCamera.CFrame.p).unit * DISTANCE)
+                local HIT,POS = game.Workspace:FindPartOnRay(RAY, game.Workspace)
+                local DIFF = math.floor((POS - AIM.Position).magnitude)
+                PLAYER_HOLD[v.Name .. i] = {}
+                PLAYER_HOLD[v.Name .. i].dist= DISTANCE
+                PLAYER_HOLD[v.Name .. i].plr = v
+                PLAYER_HOLD[v.Name .. i].diff = DIFF
+                table.insert(DISTANCES, DIFF)
+            elseif getgenv().TeamCheck == false and v.Team == Client.Team then 
+                local DISTANCE = (v.Character:FindFirstChild("Head").Position - game.Workspace.CurrentCamera.CFrame.p).magnitude
+                local RAY = Ray.new(game.Workspace.CurrentCamera.CFrame.p, (Mouse.Hit.p - game.Workspace.CurrentCamera.CFrame.p).unit * DISTANCE)
+                local HIT,POS = game.Workspace:FindPartOnRay(RAY, game.Workspace)
+                local DIFF = math.floor((POS - AIM.Position).magnitude)
+                PLAYER_HOLD[v.Name .. i] = {}
+                PLAYER_HOLD[v.Name .. i].dist= DISTANCE
+                PLAYER_HOLD[v.Name .. i].plr = v
+                PLAYER_HOLD[v.Name .. i].diff = DIFF
+                table.insert(DISTANCES, DIFF)
+            end
+        end
+    end
+    
+    if unpack(DISTANCES) == nil then
+        return nil
+    end
+    
+    local L_DISTANCE = math.floor(math.min(unpack(DISTANCES)))
+    if L_DISTANCE > getgenv().AimRadius then
+        return nil
+    end
+    
+    for i, v in pairs(PLAYER_HOLD) do
+        if v.diff == L_DISTANCE then
+            return v.plr
+        end
+    end
+    return nil
+end
+
+Mouse.KeyDown:Connect(function(a)
+    if a == AimlockKey and AimlockTarget == nil then
+        pcall(function()
+            if MousePressed ~= true then MousePressed = true end 
+            local Target;Target = GetNearestTarget()
+            if Target ~= nil then 
+                AimlockTarget = Target
+            end
+        end)
+    elseif a == AimlockKey and AimlockTarget ~= nil then
+        if AimlockTarget ~= nil then AimlockTarget = nil end
+        if MousePressed ~= false then 
+            MousePressed = false 
+        end
+    end
+end)
+--[[
+Mouse.KeyDown:Connect(function(a)
+    if a == AimlockToggleKey then
+        Aimlock = not Aimlock
+    end
+end)
+]]
+RService.RenderStepped:Connect(function()
+    if getgenv().ThirdPerson == true and getgenv().FirstPerson == true then 
+        if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude > 1 or (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude <= 1 then 
+            CanNotify = true 
+        else 
+            CanNotify = false 
+        end
+    elseif getgenv().ThirdPerson == true and getgenv().FirstPerson == false then 
+        if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude > 1 then 
+            CanNotify = true 
+        else 
+            CanNotify = false 
+        end
+    elseif getgenv().ThirdPerson == false and getgenv().FirstPerson == true then 
+        if (Camera.Focus.p - Camera.CoordinateFrame.p).Magnitude <= 1 then 
+            CanNotify = true 
+        else 
+            CanNotify = false 
+        end
+    end
+    if Aimlock == true and MousePressed == true then 
+        if AimlockTarget and AimlockTarget.Character and AimlockTarget.Character:FindFirstChild(getgenv().AimPart) then 
+            if getgenv().FirstPerson == true then
+                if CanNotify == true then
+                    if getgenv().PredictMovement == true then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position + AimlockTarget.Character[getgenv().AimPart].Velocity/PredictionVelocity)
+                    elseif getgenv().PredictMovement == false then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position)
+                    end
+                end
+            elseif getgenv().ThirdPerson == true then 
+                if CanNotify == true then
+                    if getgenv().PredictMovement == true then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position + AimlockTarget.Character[getgenv().AimPart].Velocity/PredictionVelocity)
+                    elseif getgenv().PredictMovement == false then 
+                        Camera.CFrame = CF(Camera.CFrame.p, AimlockTarget.Character[getgenv().AimPart].Position)
+                    end
+                end 
+            end
+        end
+    end
+end)
+end)
+
+Section:NewButton("Q Tool (For Mobile Users)", "ButtonInfo", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/scripthubekitten/qtoolv3/main/qtoolv3", true))()
+end)
+
+Section:NewButton("Resolution Script (helps aiming)", "ButtonInfo", function()
+    getgenv().Resolution = {
+    [".gg/scripters"] = 0.75
+}
+
+local Camera = workspace.CurrentCamera
+if getgenv().gg_scripters == nil then
+    game:GetService("RunService").RenderStepped:Connect(
+        function()
+            Camera.CFrame = Camera.CFrame * CFrame.new(0, 0, 0, 1, 0, 0, 0, getgenv().Resolution[".gg/scripters"], 0, 0, 0, 1)
+        end
+    )
+end
+getgenv().gg_scripters = "Aori0001"
+end)
+
+local Section = Tab:NewSection("Hitbox")
+
+Section:NewButton("Hitbox (Silent aim)", "ButtonInfo", function()
+    -- Function to increase hitbox size of HumanoidRootPart
+local function increaseHitboxSize()
+    -- Get player
+    local player = game.Players.LocalPlayer
+    
+    -- Check if the player has a character
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        -- Get HumanoidRootPart
+        local rootPart = player.Character.HumanoidRootPart
+        
+        -- Increase hitbox size
+        rootPart.Size = Vector3.new(25, 25, 25) -- Adjust the size as needed
+    end
+end
+
+-- Call the function to increase hitbox size
+increaseHitboxSize()
+
+end)
+
+local Section = Tab:NewSection("Client Sided Stuff")
+
+Section:NewButton("Inf Money (Client Sided)", "ButtonInfo", function()
+    -- Function to set money to infinite
+local function setInfiniteMoney()
+    -- Get player
+    local player = game.Players.LocalPlayer
+    
+    -- Check if the player has a money value
+    if player:FindFirstChild("Money") then
+        -- Set money to infinite
+        player.Money.Value = math.huge
+    end
+end
+
+-- Call the function to set money to infinite
+setInfiniteMoney()
+
+end)
+
